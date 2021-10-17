@@ -11,18 +11,31 @@ import {
 import Button from "../components/Button";
 import SkillCard from "../components/SkillCard";
 
+interface SkillData {
+  id: string;
+  name: string;
+}
+
 const Home = () => {
-  const [newSkill, setNewSkill] = useState("");
-  const [mySkill, setMySkill] = useState([]);
+  const [newSkill, setNewSkill] = useState<string>("");
+  const [mySkills, setMySkills] = useState<SkillData[]>([]);
   const [gretting, setGretting] = useState("");
 
   const handleAddNewSkill = () => {
-    setMySkill((oldSkills) => [...oldSkills, newSkill]);
+    const data = {
+      id: String(new Date().getTime()),
+      name: newSkill,
+    }
+
+    setMySkills(oldSkills => [...oldSkills, data]);
+  };
+
+  const handleRemoveSkill = (id: string) => {
+    setMySkills(oldSkills => oldSkills.filter(skill => skill.id !== id));
   };
 
   useEffect(() => {
     const curretHour = new Date().getHours();
-    console.log(curretHour);
     if (curretHour < 12) {
       setGretting("Good morning");
     } else if (curretHour >= 12 && curretHour < 18) {
@@ -45,14 +58,19 @@ const Home = () => {
         onChangeText={setNewSkill}
       />
 
-      <Button onPress={handleAddNewSkill}>Add</Button>
+      <Button title="Add" onPress={handleAddNewSkill} />
 
-      <Text style={[styles.title, { marginVertical: 50 }]}>My Skills:</Text>
+      <Text style={[styles.title, { marginVertical: 50 }]}>My Skills: </Text>
 
       <FlatList
-        data={mySkill}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => <SkillCard>{item}</SkillCard>}
+        data={mySkills}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <SkillCard
+            skill={item.name}
+            onPress={() => handleRemoveSkill(item.id)}
+          />
+        )}
       />
     </View>
   );
